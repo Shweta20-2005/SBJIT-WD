@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Advanced Process Simulator</title>
+
+<style>
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0f172a;
+    color: white;
+    text-align: center;
+}
+
+h1 { margin: 20px; }
+
+.container {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 40px;
+}
+
+.box {
+    width: 180px;
+    min-height: 150px;
+    border-radius: 12px;
+    padding: 10px;
+}
+
+#ready { background: #3b82f6; }
+#running { background: #22c55e; }
+#blocked { background: #f59e0b; }
+#terminated { background: #ef4444; }
+
+.process {
+    background: white;
+    color: black;
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+button {
+    padding: 10px;
+    margin: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover { opacity: 0.8; }
+
+</style>
+</head>
+
+<body>
+
+<h1>⚙️ Advanced Process State Simulator</h1>
+
+<div class="container">
+    <div id="ready" class="box">
+        <h3>Ready Queue</h3>
+    </div>
+    <div id="running" class="box">
+        <h3>Running</h3>
+    </div>
+    <div id="blocked" class="box">
+        <h3>Blocked</h3>
+    </div>
+    <div id="terminated" class="box">
+        <h3>Terminated</h3>
+    </div>
+</div>
+
+<div>
+    <button onclick="addProcess()">➕ Add Process</button>
+    <button onclick="startAuto()">▶ Auto Run</button>
+    <button onclick="stopAuto()">⏹ Stop</button>
+</div>
+
+<script>
+let processCount = 1;
+let autoInterval;
+
+function createProcess(name) {
+    const div = document.createElement("div");
+    div.className = "process";
+    div.innerText = name;
+    div.id = name;
+    return div;
+}
+
+function addProcess() {
+    const p = createProcess("P" + processCount++);
+    document.getElementById("ready").appendChild(p);
+}
+
+// Move first process from Ready → Running
+function dispatch() {
+    const ready = document.getElementById("ready");
+    const running = document.getElementById("running");
+
+    if (ready.children.length > 1) {
+        running.appendChild(ready.children[1]);
+    }
+}
+
+// Random behavior of running process
+function execute() {
+    const running = document.getElementById("running");
+    if (running.children.length > 1) {
+
+        const proc = running.children[1];
+        const rand = Math.random();
+
+        if (rand < 0.4) {
+            // goes to blocked
+            document.getElementById("blocked").appendChild(proc);
+        } else if (rand < 0.8) {
+            // finishes
+            document.getElementById("terminated").appendChild(proc);
+        } else {
+            // back to ready
+            document.getElementById("ready").appendChild(proc);
+        }
+    }
+}
+
+// Wake blocked processes randomly
+function wakeUp() {
+    const blocked = document.getElementById("blocked");
+    if (blocked.children.length > 1 && Math.random() > 0.5) {
+        document.getElementById("ready").appendChild(blocked.children[1]);
+    }
+}
+
+function startAuto() {
+    autoInterval = setInterval(() => {
+        dispatch();
+        setTimeout(execute, 800);
+        setTimeout(wakeUp, 1200);
+    }, 2000);
+}
+
+function stopAuto() {
+    clearInterval(autoInterval);
+}
+</script>
+
+</body>
+</html>
